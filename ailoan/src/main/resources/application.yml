@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: ailoan
+  datasource:
+    url: "jdbc:mysql://localhost:3306/spring_ai"
+    driverClassName: "com.mysql.cj.jdbc.Driver"
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:12345678}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  ai:
+    ollama:
+      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+      chat:
+        options:
+          model: ${OLLAMA_MODEL:qwen2.5:3b}
+          temperature: 0.0
+          num-predict: 120
+          num-ctx: 1024
+
+server:
+  port: 8080
+
+logging:
+  level:
+    org.springframework.ai: INFO
+    com.demo.ailoan: DEBUG
