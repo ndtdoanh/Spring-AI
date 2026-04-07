@@ -45,7 +45,12 @@ public class AiOrchestrator {
     private IntentDto parseIntent(String raw, String normalizedCommand) {
         try {
             String cleaned = extractJson(raw);
-            return objectMapper.readValue(cleaned, IntentDto.class);
+            IntentDto parsed = objectMapper.readValue(cleaned, IntentDto.class);
+            String intent = parsed.intent() == null ? "" : parsed.intent().trim().toLowerCase();
+            if (intent.isBlank() || "unknown".equals(intent)) {
+                return heuristicFallback(normalizedCommand);
+            }
+            return parsed;
         } catch (Exception e) {
             log.warn("Không parse được intent JSON: '{}', dùng heuristic. Error: {}", raw, e.getMessage());
             return heuristicFallback(normalizedCommand);
@@ -67,9 +72,14 @@ public class AiOrchestrator {
 
         if (c.contains("đếm") || c.contains("count") || c.contains("bao nhiêu"))
             return new IntentDto("count", scheme, null, null, null, null, null, null, null);
-        if (c.contains("tìm") || c.contains("khoản vay"))
+        if (c.contains("tìm") || c.contains("khoản vay")
+                || c.contains("hiển thị khoản vay") || c.contains("xem khoản vay")
+                || (c.contains("hiển thị") && scheme != null)
+                || (c.contains("xem") && scheme != null))
             return new IntentDto("find", scheme, null, null, null, null, null, null, null);
-        if (c.contains("liệt kê") || c.contains("tất cả scheme"))
+        if (c.contains("liệt kê") || c.contains("tất cả scheme")
+                || c.contains("hiển thị scheme") || c.contains("xem scheme")
+                || c.equals("hiển thị scheme") || c.equals("xem scheme"))
             return new IntentDto("list", null, null, null, null, null, null, null, null);
         if (c.contains("copy") || c.contains("sao chép"))
             return new IntentDto("copy", null, null, null, null, null, null, null, null);

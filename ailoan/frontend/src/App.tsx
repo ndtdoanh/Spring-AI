@@ -32,6 +32,12 @@ export default function App() {
 
   const sessionId = useMemo(() => getCurrentSessionId(), []);
 
+  function extractSchemeFromCommand(input: string): string | null {
+    const match = input.match(/scheme\s*[:\-]?\s*([abc])/i);
+    if (!match?.[1]) return null;
+    return match[1].toUpperCase();
+  }
+
   async function refreshAll() {
     const [s, l, a, c] = await Promise.all([
       listSchemes(),
@@ -61,12 +67,18 @@ export default function App() {
     setLoading(true);
     setError(null);
     try {
+      const commandScheme = extractSchemeFromCommand(command);
+      const targetScheme = commandScheme ?? selectedScheme;
+      if (commandScheme && commandScheme !== selectedScheme) {
+        setSelectedScheme(commandScheme);
+      }
+
       const res = await commandAI(command, adminUser);
       setCommandResult(res);
       // làm mới các bảng để thấy tool đã ảnh hưởng gì
       const next = await Promise.all([
         listSchemes(),
-        listLoans(selectedScheme),
+        listLoans(targetScheme),
         listAuditLog(),
         listChatHistory(),
       ]);

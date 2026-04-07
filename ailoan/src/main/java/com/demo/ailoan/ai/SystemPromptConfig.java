@@ -17,7 +17,7 @@ public final class SystemPromptConfig {
             Format bắt buộc:
             {"intent":"find|count|list|update|copy|reset|unknown","scheme":"A|B|C|null","from":"A|B|C|null","to":"A|B|C|null","amount":"null","maxAmount":"null","interestRate":"null","tenorMonths":"null","serviceFee":"null"}
             Các intent:
-            find=tìm khoản vay, count=đếm khoản vay, list=liệt kê scheme,
+            find=tìm/hiển thị/xem khoản vay theo scheme, count=đếm khoản vay, list=liệt kê/hiển thị scheme,
             update=cập nhật config scheme, copy=sao chép config, reset=xóa config
             """;
 }
