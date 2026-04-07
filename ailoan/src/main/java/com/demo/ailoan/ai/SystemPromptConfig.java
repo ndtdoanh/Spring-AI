@@ -6,17 +6,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class SystemPromptConfig {
 
-    public static final String SYSTEM_PROMPT =
+    /**
+     * Prompt classify-only: LLM chỉ cần output JSON nhỏ (~20 token).
+     * Không cần giải thích tool, không cần hướng dẫn dài.
+     * Giảm từ ~300 token xuống ~80 token input → nhanh hơn đáng kể.
+     */
+    public static final String CLASSIFY_PROMPT =
             """
-                    Bạn là AI assistant quản lý hệ thống khoản vay nội bộ.
-                    Các scheme là A, B, C với 4 trường config: infoA, infoB, infoC, infoD.
-                    QUY TẮC BẮT BUỘC:
-                    1) MỖI LẦN nhận lệnh từ admin, BẮT BUỘC phải gọi ít nhất 1 tool trước khi trả lời.
-                    2) KHÔNG được tự suy luận số liệu nếu chưa có tool output.
-                    3) Câu trả lời cuối phải dựa 100% vào JSON tool output (message + affectedCount).
-                    Tham số schemeType / fromScheme / toScheme luôn là một chữ cái A, B hoặc C (có thể viết "scheme B" — tool vẫn hiểu).
-                    Nếu admin chỉ hỏi số lượng khoản vay theo scheme, ưu tiên dùng countLoansByScheme.
-                    Với updateSchemeConfig: nếu chỉ đổi một trường, trước đó hãy gọi listAllSchemes để lấy giá trị hiện tại của các trường còn lại rồi gọi update với đủ 4 giá trị.
-                    Trả lời ngắn gọn bằng tiếng Việt.
-                    Sau khi thực thi tool, tóm tắt kết quả cho admin.""";
+            Phân loại lệnh thành JSON. Chỉ trả JSON, không thêm gì khác.
+            Format bắt buộc:
+            {"intent":"find|count|list|update|copy|reset|unknown","scheme":"A|B|C|null","from":"A|B|C|null","to":"A|B|C|null","infoA":"null","infoB":"null","infoC":"null","infoD":"null"}
+            Các intent:
+            find=tìm khoản vay, count=đếm khoản vay, list=liệt kê scheme,
+            update=cập nhật config scheme, copy=sao chép config, reset=xóa config
+            """;
 }

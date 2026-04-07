@@ -2,6 +2,7 @@ package com.demo.ailoan.controller;
 
 import com.demo.ailoan.ai.AiCommandContext;
 import com.demo.ailoan.ai.AiOrchestrator;
+import com.demo.ailoan.ai.OrchestratorResult;
 import com.demo.ailoan.dto.AiCommandRequest;
 import com.demo.ailoan.dto.AiCommandResponse;
 import com.demo.ailoan.service.ChatHistoryService;
@@ -22,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AiCommandController {
 
     private final AiOrchestrator aiOrchestrator;
-    private final AiCommandContext commandContext;
+    private final AiCommandContext commandContext;   // giữ lại để audit vẫn hoạt động
     private final ChatHistoryService chatHistoryService;
 
     @PostMapping("/command")
@@ -31,26 +32,29 @@ public class AiCommandController {
             @RequestHeader(value = "X-Admin-User", required = false) String adminUser,
             @Valid @RequestBody AiCommandRequest body,
             HttpServletResponse response) {
-        String sessionId =
-                sessionIdHeader != null && !sessionIdHeader.isBlank()
-                        ? sessionIdHeader.trim()
-                        : UUID.randomUUID().toString();
+
+        String sessionId = (sessionIdHeader != null && !sessionIdHeader.isBlank())
+                ? sessionIdHeader.trim()
+                : UUID.randomUUID().toString();
         response.setHeader("X-Session-Id", sessionId);
 
         String command = body.command().trim();
         chatHistoryService.append(sessionId, "user", command);
+
+        // begin() vẫn cần để LoanTools ghi audit đúng adminUser + prompt
         commandContext.begin(adminUser, command);
 
-        String llmMessage = aiOrchestrator.runConversationTurn(command);
-        String message = commandContext.getToolCalledSummary().isBlank()
-                ? "Không có tool nào được gọi. Vui lòng thử lại lệnh rõ hơn."
-                : commandContext.getLastToolMessage();
-        if (message == null || message.isBlank()) {
-            message = llmMessage;
-        }
-        AiCommandResponse res =
-                new AiCommandResponse(
-                        message, commandContext.getToolCalledSummary(), commandContext.getLastAffectedCount());
+        // Chạy orchestrator — trả OrchestratorResult thay vì String
+        OrchestratorResult result = aiOrchestrator.runConversationTurn(command);
+
+        // Lấy message trực tiếp từ result, không còn phụ thuộc vào AiCommandContext
+        String message = result.message();
+
+        AiCommandResponse res = new AiCommandResponse(
+                message,
+                result.toolCalled(),
+                result.affectedCount());
+
         chatHistoryService.append(sessionId, "assistant", message);
         return ResponseEntity.ok(res);
     }

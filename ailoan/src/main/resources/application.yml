@@ -2,14 +2,17 @@ spring:
   application:
     name: ailoan
   datasource:
-    url: "jdbc:mysql://localhost:3306/spring_ai"
-    driverClassName: "com.mysql.cj.jdbc.Driver"
-    username: ${DB_USER:root}
-    password: ${DB_PASSWORD:12345678}
+    url: "jdbc:postgresql://localhost:5432/spring-ai"
+    driverClassName: "org.postgresql.Driver"
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:ndtdoanh}
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
   ai:
     ollama:
       base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
@@ -17,8 +20,12 @@ spring:
         options:
           model: ${OLLAMA_MODEL:qwen2.5:3b}
           temperature: 0.0
-          num-predict: 120
-          num-ctx: 1024
+          num-predict: 40
+          num-ctx: 2048
+          top-k: 1
+          top-p: 1.0
+          repeat-penalty: 1.1
+
 
 server:
   port: 8080
