@@ -47,7 +47,7 @@ Khi chạy app trong Docker (không có trong file compose mẫu), đặt `DB_HO
 
 ## Dữ liệu mẫu
 
-- 3 scheme **A, B, C** với `infoA`–`infoD` (scheme **B** có `infoB = 456` để demo lệnh lọc).
+- 3 scheme **A, B, C** với config `maxAmount`, `interestRate`, `tenorMonths`, `serviceFee`.
 - **20** khoản vay: 7 thuộc A, 7 thuộc B, 6 thuộc C.
 
 ## API
@@ -72,11 +72,12 @@ curl -s -X POST http://localhost:8080/api/admin/ai/command \
 
 Các ý khác có thể thử:
 
-- `Gắn infoA = 123 cho scheme B` (AI nên gọi `listAllSchemes` rồi `updateSchemeConfig`).
+- `Cập nhật interestRate = 8.5 cho scheme B` (AI nên gọi `listAllSchemes` rồi `updateSchemeConfig`).
+- `Cập nhật số tiền = 100000000 cho scheme A` (AI sẽ cập nhật `amount` cho tất cả loan thuộc scheme A).
 - `Liệt kê tất cả scheme đang có`
 - `Copy config scheme A sang scheme C`
-- `Scheme nào đang có infoB là 456?`
-- `Nhân đôi infoA của scheme B`
+- `Scheme nào đang có interestRate là 8.5?`
+- `Nhân đôi maxAmount của scheme B`
 
 ## Cấu trúc chính
 

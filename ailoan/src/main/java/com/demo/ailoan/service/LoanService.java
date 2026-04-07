@@ -2,6 +2,8 @@ package com.demo.ailoan.service;
 
 import com.demo.ailoan.entity.Loan;
 import com.demo.ailoan.repository.LoanRepository;
+import com.demo.ailoan.util.SchemeNameUtil;
+import java.math.BigDecimal;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,5 +34,11 @@ public class LoanService {
             return findAll().size();
         }
         return Math.toIntExact(loanRepository.countBySchemeName(schemeName.trim()));
+    }
+
+    @Transactional
+    public int updateAmountBySchemeName(String schemeName, BigDecimal amount) {
+        String normalizedScheme = SchemeNameUtil.normalize(schemeName);
+        return loanRepository.updateAmountBySchemeName(normalizedScheme, amount);
     }
 }

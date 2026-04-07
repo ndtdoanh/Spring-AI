@@ -14,6 +14,7 @@ import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,20 +75,20 @@ public class LoanTools {
         }
     }
 
-    @Tool(description = "Cập nhật toàn bộ 4 trường infoA, infoB, infoC, infoD của một scheme. Khi chỉ đổi một trường, hãy gọi listAllSchemes trước để giữ nguyên các trường khác.")
+    @Tool(description = "Cập nhật toàn bộ 4 trường maxAmount, interestRate, tenorMonths, serviceFee của một scheme. Khi chỉ đổi một trường, hãy gọi listAllSchemes trước để giữ nguyên các trường khác.")
     public String updateSchemeConfig(
             @ToolParam(description = "Scheme A, B hoặc C") String schemeType,
-            @ToolParam(description = "Giá trị infoA") String infoA,
-            @ToolParam(description = "Giá trị infoB") String infoB,
-            @ToolParam(description = "Giá trị infoC") String infoC,
-            @ToolParam(description = "Giá trị infoD") String infoD) {
+            @ToolParam(description = "Giá trị maxAmount") String maxAmount,
+            @ToolParam(description = "Giá trị interestRate") String interestRate,
+            @ToolParam(description = "Giá trị tenorMonths") String tenorMonths,
+            @ToolParam(description = "Giá trị serviceFee") String serviceFee) {
         Map<String, Object> params = Map.of("schemeType", schemeType,
-                "infoA", infoA,
-                "infoB", infoB,
-                "infoC", infoC,
-                "infoD", infoD);
+                "maxAmount", maxAmount,
+                "interestRate", interestRate,
+                "tenorMonths", tenorMonths,
+                "serviceFee", serviceFee);
         try {
-            Scheme updated = schemeService.updateConfig(schemeType, infoA, infoB, infoC, infoD);
+            Scheme updated = schemeService.updateConfig(schemeType, maxAmount, interestRate, tenorMonths, serviceFee);
             ToolResult toolResult = new ToolResult(
                     "Đã cập nhật config cho scheme " + updated.getName() + ".",
                     schemeMap(updated),
@@ -101,7 +102,7 @@ public class LoanTools {
         }
     }
 
-    @Tool(description = "Liệt kê tất cả scheme và cấu hình infoA–infoD hiện tại.")
+    @Tool(description = "Liệt kê tất cả scheme và cấu hình maxAmount, interestRate, tenorMonths, serviceFee hiện tại.")
     public String listAllSchemes() {
         Map<String, Object> params = Map.of();
         try {
@@ -141,7 +142,7 @@ public class LoanTools {
         }
     }
 
-    @Tool(description = "Reset toàn bộ infoA–infoD của scheme về rỗng.")
+    @Tool(description = "Reset toàn bộ maxAmount, interestRate, tenorMonths, serviceFee của scheme về rỗng.")
     public String resetSchemeConfig(@ToolParam(description = "Scheme A/B/C") String schemeType) {
         Map<String, Object> params = Map.of("schemeType", schemeType);
         try {
@@ -159,14 +160,36 @@ public class LoanTools {
         }
     }
 
+    @Tool(description = "Cập nhật amount cho toàn bộ khoản vay trong một scheme.")
+    public String updateLoanAmountByScheme(
+            @ToolParam(description = "Scheme A, B hoặc C") String schemeType,
+            @ToolParam(description = "Số tiền mới cho tất cả khoản vay trong scheme") String amount) {
+        Map<String, Object> params = Map.of("schemeType", schemeType, "amount", amount);
+        try {
+            String normalizedScheme = SchemeNameUtil.normalize(schemeType);
+            BigDecimal parsedAmount = new BigDecimal(amount.trim());
+            int affected = loanService.updateAmountBySchemeName(normalizedScheme, parsedAmount);
+            ToolResult toolResult = new ToolResult(
+                    "Đã cập nhật amount = " + parsedAmount + " cho " + affected + " khoản vay thuộc scheme " + normalizedScheme + ".",
+                    Map.of("scheme", normalizedScheme, "amount", parsedAmount, "affected", affected),
+                    affected);
+            String result = writeJson(toolResult);
+            audit("updateLoanAmountByScheme", params, result);
+            commandContext.recordToolResult("updateLoanAmountByScheme", toolResult);
+            return result;
+        } catch (Exception e) {
+            return toolError("updateLoanAmountByScheme", e);
+        }
+    }
+
     private Map<String, Object> schemeMap(Scheme s) {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("id", s.getId());
         m.put("name", s.getName());
-        m.put("infoA", s.getInfoA());
-        m.put("infoB", s.getInfoB());
-        m.put("infoC", s.getInfoC());
-        m.put("infoD", s.getInfoD());
+        m.put("maxAmount", s.getMaxAmount());
+        m.put("interestRate", s.getInterestRate());
+        m.put("tenorMonths", s.getTenorMonths());
+        m.put("serviceFee", s.getServiceFee());
         m.put("updatedAt", s.getUpdatedAt().toString());
         return m;
     }

@@ -28,12 +28,12 @@ public class SchemeService {
     }
 
     @Transactional
-    public Scheme updateConfig(String schemeType, String infoA, String infoB, String infoC, String infoD) {
+    public Scheme updateConfig(String schemeType, String maxAmount, String interestRate, String tenorMonths, String serviceFee) {
         Scheme s = requireByName(schemeType);
-        s.setInfoA(infoA);
-        s.setInfoB(infoB);
-        s.setInfoC(infoC);
-        s.setInfoD(infoD);
+        s.setMaxAmount(maxAmount);
+        s.setInterestRate(interestRate);
+        s.setTenorMonths(tenorMonths);
+        s.setServiceFee(serviceFee);
         s.setUpdatedAt(Instant.now());
         return schemeRepository.save(s);
     }
@@ -42,10 +42,10 @@ public class SchemeService {
     public Scheme copyConfig(String fromScheme, String toScheme) {
         Scheme src = requireByName(fromScheme);
         Scheme dst = requireByName(toScheme);
-        dst.setInfoA(src.getInfoA());
-        dst.setInfoB(src.getInfoB());
-        dst.setInfoC(src.getInfoC());
-        dst.setInfoD(src.getInfoD());
+        dst.setMaxAmount(src.getMaxAmount());
+        dst.setInterestRate(src.getInterestRate());
+        dst.setTenorMonths(src.getTenorMonths());
+        dst.setServiceFee(src.getServiceFee());
         dst.setUpdatedAt(Instant.now());
         return schemeRepository.save(dst);
     }

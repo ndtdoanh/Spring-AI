@@ -29,17 +29,17 @@ public class Scheme {
     @Column(nullable = false, unique = true, length = 8)
     private String name;
 
-    @Column(length = 512)
-    private String infoA;
+    @Column(name = "max_amount", length = 512)
+    private String maxAmount;
 
-    @Column(length = 512)
-    private String infoB;
+    @Column(name = "interest_rate", length = 512)
+    private String interestRate;
 
-    @Column(length = 512)
-    private String infoC;
+    @Column(name = "tenor_months", length = 512)
+    private String tenorMonths;
 
-    @Column(length = 512)
-    private String infoD;
+    @Column(name = "service_fee", length = 512)
+    private String serviceFee;
 
     @Column(nullable = false)
     private Instant updatedAt;

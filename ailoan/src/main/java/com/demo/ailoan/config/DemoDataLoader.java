@@ -29,30 +29,30 @@ public class DemoDataLoader implements ApplicationRunner {
                 schemeRepository.save(
                         Scheme.builder()
                                 .name("A")
-                                .infoA("100")
-                                .infoB("200")
-                                .infoC("300")
-                                .infoD("400")
+                                .maxAmount("100")
+                                .interestRate("200")
+                                .tenorMonths("300")
+                                .serviceFee("400")
                                 .updatedAt(t0)
                                 .build());
         Scheme b =
                 schemeRepository.save(
                         Scheme.builder()
                                 .name("B")
-                                .infoA("110")
-                                .infoB("456")
-                                .infoC("310")
-                                .infoD("410")
+                                .maxAmount("110")
+                                .interestRate("456")
+                                .tenorMonths("310")
+                                .serviceFee("410")
                                 .updatedAt(t0)
                                 .build());
         Scheme c =
                 schemeRepository.save(
                         Scheme.builder()
                                 .name("C")
-                                .infoA("120")
-                                .infoB("220")
-                                .infoC("320")
-                                .infoD("420")
+                                .maxAmount("120")
+                                .interestRate("220")
+                                .tenorMonths("320")
+                                .serviceFee("420")
                                 .updatedAt(t0)
                                 .build());
 

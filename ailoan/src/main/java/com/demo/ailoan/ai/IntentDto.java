@@ -12,10 +12,11 @@ public record IntentDto(
         String scheme,   // A | B | C | null
         String from,     // dùng cho copy: scheme nguồn
         String to,       // dùng cho copy: scheme đích
-        String infoA,
-        String infoB,
-        String infoC,
-        String infoD
+        String amount,
+        String maxAmount,
+        String interestRate,
+        String tenorMonths,
+        String serviceFee
 ) {
     // Normalize null string từ LLM ("null" string → Java null)
     public String schemeNormalized() {
@@ -30,20 +31,24 @@ public record IntentDto(
         return isNullStr(to) ? null : to;
     }
 
-    public String infoANormalized() {
-        return isNullStr(infoA) ? "" : infoA;
+    public String amountNormalized() {
+        return isNullStr(amount) ? "" : amount;
     }
 
-    public String infoBNormalized() {
-        return isNullStr(infoB) ? "" : infoB;
+    public String maxAmountNormalized() {
+        return isNullStr(maxAmount) ? "" : maxAmount;
     }
 
-    public String infoCNormalized() {
-        return isNullStr(infoC) ? "" : infoC;
+    public String interestRateNormalized() {
+        return isNullStr(interestRate) ? "" : interestRate;
     }
 
-    public String infoDNormalized() {
-        return isNullStr(infoD) ? "" : infoD;
+    public String tenorMonthsNormalized() {
+        return isNullStr(tenorMonths) ? "" : tenorMonths;
+    }
+
+    public String serviceFeeNormalized() {
+        return isNullStr(serviceFee) ? "" : serviceFee;
     }
 
     private boolean isNullStr(String s) {

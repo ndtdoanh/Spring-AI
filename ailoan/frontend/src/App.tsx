@@ -11,7 +11,7 @@ import {
 
 export default function App() {
   const [adminUser, setAdminUser] = useState<string>("admin");
-  const [command, setCommand] = useState<string>("Tìm tất cả khoản vay scheme A");
+  const [command, setCommand] = useState<string>("Cập nhật số tiền = 100000000 cho scheme A");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [commandResult, setCommandResult] = useState<null | {
@@ -25,6 +25,10 @@ export default function App() {
   const [loans, setLoans] = useState<Loan[]>([]);
   const [auditLog, setAuditLog] = useState<AuditLog[]>([]);
   const [chatHistory, setChatHistory] = useState<ChatHistory[]>([]);
+  const selectedSchemeConfig = useMemo(
+    () => schemes.find((s) => s.name === selectedScheme) ?? null,
+    [schemes, selectedScheme]
+  );
 
   const sessionId = useMemo(() => getCurrentSessionId(), []);
 
@@ -161,6 +165,13 @@ export default function App() {
           <div className="muted" style={{ marginTop: 12, marginBottom: 6 }}>
             Loans (lọc theo scheme)
           </div>
+          {selectedSchemeConfig ? (
+            <div className="muted" style={{ marginBottom: 8 }}>
+              Cấu hình scheme {selectedSchemeConfig.name}: maxAmount={selectedSchemeConfig.maxAmount || "-"} | interestRate=
+              {selectedSchemeConfig.interestRate || "-"} | tenorMonths={selectedSchemeConfig.tenorMonths || "-"} |
+              serviceFee={selectedSchemeConfig.serviceFee || "-"}
+            </div>
+          ) : null}
           <div className="list">
             <table>
               <thead>
@@ -197,6 +208,41 @@ export default function App() {
 
       <div className="grid" style={{ gridTemplateColumns: "1fr 1fr" }}>
         <div className="card">
+          <div className="muted" style={{ marginBottom: 6 }}>
+            Danh sách scheme & cấu hình
+          </div>
+          <div className="list" style={{ marginBottom: 10 }}>
+            <table>
+              <thead>
+                <tr>
+                  <th>Scheme</th>
+                  <th>Max Amount</th>
+                  <th>Interest Rate</th>
+                  <th>Tenor (months)</th>
+                  <th>Service Fee</th>
+                </tr>
+              </thead>
+              <tbody>
+                {schemes.map((s) => (
+                  <tr key={`scheme-${s.id}`}>
+                    <td className="mono">{s.name}</td>
+                    <td>{s.maxAmount || "-"}</td>
+                    <td>{s.interestRate || "-"}</td>
+                    <td>{s.tenorMonths || "-"}</td>
+                    <td>{s.serviceFee || "-"}</td>
+                  </tr>
+                ))}
+                {schemes.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="muted">
+                      Không có scheme
+                    </td>
+                  </tr>
+                ) : null}
+              </tbody>
+            </table>
+          </div>
+
           <div className="muted" style={{ marginBottom: 6 }}>
             Audit Log (tool đã gọi)
           </div>

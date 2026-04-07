@@ -17,7 +17,7 @@ public class AiOrchestrator {
 
     public OrchestratorResult runConversationTurn(String command) {
         // Bước 0: Normalize câu lệnh — map từ tự nhiên → field chuẩn
-        // Ví dụ: "số tiền" → "infoA", "thành 100" → "= 100"
+        // Ví dụ: "số tiền" → "amount", "thành 100" → "= 100"
         String normalizedCommand = CommandNormalizer.normalize(command);
         log.debug("Normalized command: '{}' → '{}'", command, normalizedCommand);
 
@@ -66,18 +66,18 @@ public class AiOrchestrator {
         String scheme = extractSchemeHeuristic(c);
 
         if (c.contains("đếm") || c.contains("count") || c.contains("bao nhiêu"))
-            return new IntentDto("count", scheme, null, null, null, null, null, null);
+            return new IntentDto("count", scheme, null, null, null, null, null, null, null);
         if (c.contains("tìm") || c.contains("khoản vay"))
-            return new IntentDto("find", scheme, null, null, null, null, null, null);
+            return new IntentDto("find", scheme, null, null, null, null, null, null, null);
         if (c.contains("liệt kê") || c.contains("tất cả scheme"))
-            return new IntentDto("list", null, null, null, null, null, null, null);
+            return new IntentDto("list", null, null, null, null, null, null, null, null);
         if (c.contains("copy") || c.contains("sao chép"))
-            return new IntentDto("copy", null, null, null, null, null, null, null);
+            return new IntentDto("copy", null, null, null, null, null, null, null, null);
         if (c.contains("reset") || c.contains("xóa config"))
-            return new IntentDto("reset", scheme, null, null, null, null, null, null);
+            return new IntentDto("reset", scheme, null, null, null, null, null, null, null);
         if (c.contains("cập nhật") || c.contains("update") || c.contains("đổi") || c.contains("sửa"))
-            return new IntentDto("update", scheme, null, null, null, null, null, null);
-        return new IntentDto("unknown", null, null, null, null, null, null, null);
+            return new IntentDto("update", scheme, null, null, null, null, null, null, null);
+        return new IntentDto("unknown", null, null, null, null, null, null, null, null);
     }
 
     private String extractSchemeHeuristic(String cmd) {
@@ -135,19 +135,25 @@ public class AiOrchestrator {
         if (scheme == null)
             return OrchestratorResult.error("Vui lòng chỉ rõ scheme cần cập nhật (A, B hoặc C).");
 
-        String infoA = intent.infoANormalized();
-        String infoB = intent.infoBNormalized();
-        String infoC = intent.infoCNormalized();
-        String infoD = intent.infoDNormalized();
+        String amount = intent.amountNormalized();
+        String maxAmount = intent.maxAmountNormalized();
+        String interestRate = intent.interestRateNormalized();
+        String tenorMonths = intent.tenorMonthsNormalized();
+        String serviceFee = intent.serviceFeeNormalized();
 
-        boolean anyProvided = !infoA.isBlank() || !infoB.isBlank()
-                || !infoC.isBlank() || !infoD.isBlank();
+        if (!amount.isBlank()) {
+            return OrchestratorResult.of("updateLoanAmountByScheme",
+                    loanTools.updateLoanAmountByScheme(scheme, amount));
+        }
+
+        boolean anyProvided = !maxAmount.isBlank() || !interestRate.isBlank()
+                || !tenorMonths.isBlank() || !serviceFee.isBlank();
 
         if (!anyProvided) {
             return OrchestratorResult.error(
                     "Vui lòng chỉ rõ trường và giá trị cần cập nhật.\n" +
-                            "Ví dụ: \"Cập nhật infoA = 500 cho scheme A\"\n" +
-                            "Hoặc dùng tên trường: \"Cập nhật số tiền = 500 cho scheme A\"");
+                            "Ví dụ: \"Cập nhật amount = 500 cho scheme A\" (đổi amount của loans)\n" +
+                            "Hoặc: \"Cập nhật interestRate = 8.5 cho scheme A\" (đổi config scheme)");
         }
 
         // Lấy current values để merge — tránh xóa trắng các trường không đổi
@@ -157,10 +163,10 @@ public class AiOrchestrator {
             com.fasterxml.jackson.databind.JsonNode schemes = root.path("uiPayload").path("schemes");
             for (com.fasterxml.jackson.databind.JsonNode s : schemes) {
                 if (scheme.equalsIgnoreCase(s.path("name").asText())) {
-                    if (infoA.isBlank()) infoA = s.path("infoA").asText("");
-                    if (infoB.isBlank()) infoB = s.path("infoB").asText("");
-                    if (infoC.isBlank()) infoC = s.path("infoC").asText("");
-                    if (infoD.isBlank()) infoD = s.path("infoD").asText("");
+                    if (maxAmount.isBlank()) maxAmount = s.path("maxAmount").asText("");
+                    if (interestRate.isBlank()) interestRate = s.path("interestRate").asText("");
+                    if (tenorMonths.isBlank()) tenorMonths = s.path("tenorMonths").asText("");
+                    if (serviceFee.isBlank()) serviceFee = s.path("serviceFee").asText("");
                     break;
                 }
             }
@@ -169,6 +175,6 @@ public class AiOrchestrator {
         }
 
         return OrchestratorResult.of("updateSchemeConfig",
-                loanTools.updateSchemeConfig(scheme, infoA, infoB, infoC, infoD));
+                loanTools.updateSchemeConfig(scheme, maxAmount, interestRate, tenorMonths, serviceFee));
     }
 }

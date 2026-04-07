@@ -1,10 +1,10 @@
 export type Scheme = {
   id: number;
   name: string;
-  infoA: string | null;
-  infoB: string | null;
-  infoC: string | null;
-  infoD: string | null;
+  maxAmount: string | null;
+  interestRate: string | null;
+  tenorMonths: string | null;
+  serviceFee: string | null;
   updatedAt: string;
 };
 
