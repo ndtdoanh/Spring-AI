@@ -160,25 +160,35 @@ public class LoanTools {
         }
     }
 
-    @Tool(description = "Cập nhật amount cho toàn bộ khoản vay trong một scheme.")
-    public String updateLoanAmountByScheme(
-            @ToolParam(description = "Scheme A, B hoặc C") String schemeType,
-            @ToolParam(description = "Số tiền mới cho tất cả khoản vay trong scheme") String amount) {
-        Map<String, Object> params = Map.of("schemeType", schemeType, "amount", amount);
+    @Tool(description = "Cập nhật amount cho loans theo bộ lọc: scheme, customerName, loanId. Có thể truyền một hoặc nhiều điều kiện lọc.")
+    public String updateLoanAmountByFilters(
+            @ToolParam(description = "Scheme A, B hoặc C (optional)") String schemeType,
+            @ToolParam(description = "Tên khách hàng hoặc một phần tên (optional)") String customerName,
+            @ToolParam(description = "ID khoản vay (optional)") Long loanId,
+            @ToolParam(description = "Số tiền mới") String amount) {
+        Map<String, Object> params = new LinkedHashMap<>();
+        params.put("schemeType", schemeType);
+        params.put("customerName", customerName);
+        params.put("loanId", loanId);
+        params.put("amount", amount);
         try {
-            String normalizedScheme = SchemeNameUtil.normalize(schemeType);
             BigDecimal parsedAmount = new BigDecimal(amount.trim());
-            int affected = loanService.updateAmountBySchemeName(normalizedScheme, parsedAmount);
+            int affected = loanService.updateAmountByFilters(schemeType, customerName, loanId, parsedAmount);
             ToolResult toolResult = new ToolResult(
-                    "Đã cập nhật amount = " + parsedAmount + " cho " + affected + " khoản vay thuộc scheme " + normalizedScheme + ".",
-                    Map.of("scheme", normalizedScheme, "amount", parsedAmount, "affected", affected),
+                    "Đã cập nhật amount = " + parsedAmount + " cho " + affected + " khoản vay.",
+                    Map.of(
+                            "scheme", schemeType,
+                            "customerName", customerName,
+                            "loanId", loanId,
+                            "amount", parsedAmount,
+                            "affected", affected),
                     affected);
             String result = writeJson(toolResult);
-            audit("updateLoanAmountByScheme", params, result);
-            commandContext.recordToolResult("updateLoanAmountByScheme", toolResult);
+            audit("updateLoanAmountByFilters", params, result);
+            commandContext.recordToolResult("updateLoanAmountByFilters", toolResult);
             return result;
         } catch (Exception e) {
-            return toolError("updateLoanAmountByScheme", e);
+            return toolError("updateLoanAmountByFilters", e);
         }
     }
 

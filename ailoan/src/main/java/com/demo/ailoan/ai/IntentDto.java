@@ -12,6 +12,8 @@ public record IntentDto(
         String scheme,   // A | B | C | null
         String from,     // dùng cho copy: scheme nguồn
         String to,       // dùng cho copy: scheme đích
+        String customerName,
+        String loanId,
         String amount,
         String maxAmount,
         String interestRate,
@@ -33,6 +35,19 @@ public record IntentDto(
 
     public String amountNormalized() {
         return isNullStr(amount) ? "" : amount;
+    }
+
+    public String customerNameNormalized() {
+        return isNullStr(customerName) ? "" : customerName.trim();
+    }
+
+    public Long loanIdNormalized() {
+        if (isNullStr(loanId)) return null;
+        try {
+            return Long.parseLong(loanId.trim());
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     public String maxAmountNormalized() {

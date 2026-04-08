@@ -39,6 +39,7 @@ public final class CommandNormalizer {
         // --- Normalize cú pháp "thành X" → "= X" để LLM dễ parse hơn ---
         // "amount thành 100" → "amount = 100"
         result = result.replaceAll("(?i)(amount|maxAmount|interestRate|tenorMonths|serviceFee)\\s+thành\\s+", "$1 = ");
+        result = result.replaceAll("(?i)(amount|maxAmount|interestRate|tenorMonths|serviceFee)\\s+bằng\\s+", "$1 = ");
 
         // --- Normalize "tất cả scheme X" → "scheme X" (bỏ "tất cả" thừa) ---
         result = result.replaceAll("(?i)tất\\s*cả\\s+scheme", "scheme");

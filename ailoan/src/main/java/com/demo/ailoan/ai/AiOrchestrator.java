@@ -71,23 +71,23 @@ public class AiOrchestrator {
         String scheme = extractSchemeHeuristic(c);
 
         if (c.contains("đếm") || c.contains("count") || c.contains("bao nhiêu"))
-            return new IntentDto("count", scheme, null, null, null, null, null, null, null);
+            return new IntentDto("count", scheme, null, null, null, null, null, null, null, null, null);
         if (c.contains("tìm") || c.contains("khoản vay")
                 || c.contains("hiển thị khoản vay") || c.contains("xem khoản vay")
                 || (c.contains("hiển thị") && scheme != null)
                 || (c.contains("xem") && scheme != null))
-            return new IntentDto("find", scheme, null, null, null, null, null, null, null);
+            return new IntentDto("find", scheme, null, null, null, null, null, null, null, null, null);
         if (c.contains("liệt kê") || c.contains("tất cả scheme")
                 || c.contains("hiển thị scheme") || c.contains("xem scheme")
                 || c.equals("hiển thị scheme") || c.equals("xem scheme"))
-            return new IntentDto("list", null, null, null, null, null, null, null, null);
+            return new IntentDto("list", null, null, null, null, null, null, null, null, null, null);
         if (c.contains("copy") || c.contains("sao chép"))
-            return new IntentDto("copy", null, null, null, null, null, null, null, null);
+            return new IntentDto("copy", null, null, null, null, null, null, null, null, null, null);
         if (c.contains("reset") || c.contains("xóa config"))
-            return new IntentDto("reset", scheme, null, null, null, null, null, null, null);
+            return new IntentDto("reset", scheme, null, null, null, null, null, null, null, null, null);
         if (c.contains("cập nhật") || c.contains("update") || c.contains("đổi") || c.contains("sửa"))
-            return new IntentDto("update", scheme, null, null, null, null, null, null, null);
-        return new IntentDto("unknown", null, null, null, null, null, null, null, null);
+            return new IntentDto("update", scheme, null, null, extractCustomerNameHeuristic(c), extractLoanIdHeuristic(c), extractAmountHeuristic(c), null, null, null, null);
+        return new IntentDto("unknown", null, null, null, null, null, null, null, null, null, null);
     }
 
     private String extractSchemeHeuristic(String cmd) {
@@ -95,6 +95,30 @@ public class AiOrchestrator {
                 .compile("scheme\\s*[:\\-]?\\s*([abc])", java.util.regex.Pattern.CASE_INSENSITIVE)
                 .matcher(cmd);
         if (m.find()) return m.group(1).toUpperCase();
+        return null;
+    }
+
+    private String extractCustomerNameHeuristic(String cmd) {
+        java.util.regex.Matcher m = java.util.regex.Pattern
+                .compile("(khách\\s*hàng\\s*\\d+)", java.util.regex.Pattern.CASE_INSENSITIVE)
+                .matcher(cmd);
+        if (m.find()) return m.group(1).trim();
+        return null;
+    }
+
+    private String extractLoanIdHeuristic(String cmd) {
+        java.util.regex.Matcher m = java.util.regex.Pattern
+                .compile("(id|loan\\s*id|khoản\\s*vay\\s*số)\\s*[:\\-]?\\s*(\\d+)", java.util.regex.Pattern.CASE_INSENSITIVE)
+                .matcher(cmd);
+        if (m.find()) return m.group(2);
+        return null;
+    }
+
+    private String extractAmountHeuristic(String cmd) {
+        java.util.regex.Matcher m = java.util.regex.Pattern
+                .compile("amount\\s*=\\s*([0-9]+(?:\\.[0-9]+)?)", java.util.regex.Pattern.CASE_INSENSITIVE)
+                .matcher(cmd);
+        if (m.find()) return m.group(1);
         return null;
     }
 
@@ -146,14 +170,23 @@ public class AiOrchestrator {
             return OrchestratorResult.error("Vui lòng chỉ rõ scheme cần cập nhật (A, B hoặc C).");
 
         String amount = intent.amountNormalized();
+        String customerName = intent.customerNameNormalized();
+        Long loanId = intent.loanIdNormalized();
         String maxAmount = intent.maxAmountNormalized();
         String interestRate = intent.interestRateNormalized();
         String tenorMonths = intent.tenorMonthsNormalized();
         String serviceFee = intent.serviceFeeNormalized();
 
         if (!amount.isBlank()) {
-            return OrchestratorResult.of("updateLoanAmountByScheme",
-                    loanTools.updateLoanAmountByScheme(scheme, amount));
+            boolean hasLoanFilter = (scheme != null && !scheme.isBlank())
+                    || !customerName.isBlank()
+                    || loanId != null;
+            if (!hasLoanFilter) {
+                return OrchestratorResult.error(
+                        "Vui lòng chỉ rõ phạm vi cập nhật amount (scheme, khách hàng hoặc loan id).");
+            }
+            return OrchestratorResult.of("updateLoanAmountByFilters",
+                    loanTools.updateLoanAmountByFilters(scheme, customerName, loanId, amount));
         }
 
         boolean anyProvided = !maxAmount.isBlank() || !interestRate.isBlank()

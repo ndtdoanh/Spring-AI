@@ -74,6 +74,7 @@ Các ý khác có thể thử:
 
 - `Cập nhật interestRate = 8.5 cho scheme B` (AI nên gọi `listAllSchemes` rồi `updateSchemeConfig`).
 - `Cập nhật số tiền = 100000000 cho scheme A` (AI sẽ cập nhật `amount` cho tất cả loan thuộc scheme A).
+- `Cập nhật số tiền bằng 100 cho khách hàng 1` (AI cập nhật loan theo filter customer).
 - `Liệt kê tất cả scheme đang có`
 - `Copy config scheme A sang scheme C`
 - `Scheme nào đang có interestRate là 8.5?`

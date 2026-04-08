@@ -5,6 +5,7 @@ import com.demo.ailoan.repository.LoanRepository;
 import com.demo.ailoan.util.SchemeNameUtil;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,5 +41,23 @@ public class LoanService {
     public int updateAmountBySchemeName(String schemeName, BigDecimal amount) {
         String normalizedScheme = SchemeNameUtil.normalize(schemeName);
         return loanRepository.updateAmountBySchemeName(normalizedScheme, amount);
+    }
+
+    @Transactional
+    public int updateAmountByFilters(String schemeName, String customerName, Long loanId, BigDecimal amount) {
+        List<Loan> loans = loanRepository.findAllFetched();
+        String normalizedScheme = (schemeName == null || schemeName.isBlank()) ? null : SchemeNameUtil.normalize(schemeName);
+        String customerNeedle = (customerName == null || customerName.isBlank()) ? null : customerName.trim().toLowerCase(Locale.ROOT);
+
+        List<Loan> matched = loans.stream()
+                .filter(l -> normalizedScheme == null || normalizedScheme.equalsIgnoreCase(l.getScheme().getName()))
+                .filter(l -> loanId == null || loanId.equals(l.getId()))
+                .filter(l -> customerNeedle == null
+                        || l.getCustomerName().toLowerCase(Locale.ROOT).contains(customerNeedle))
+                .toList();
+
+        matched.forEach(l -> l.setAmount(amount));
+        loanRepository.saveAll(matched);
+        return matched.size();
     }
 }
