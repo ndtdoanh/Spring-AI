@@ -1,14 +1,17 @@
 package com.demo.ailoan.controller;
 
+import com.demo.ailoan.entity.Product;
 import com.demo.ailoan.service.AiAdminService;
-import com.demo.ailoan.service.AiAdminService.AiResult;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 @Validated
 @RestController
@@ -22,8 +25,13 @@ public class AiCommandController {
     }
 
     @PostMapping("/command")
-    public AiResult handleCommand(@Valid @RequestBody CommandRequest request) {
-        return aiAdminService.handlePrompt(request.prompt());
+    public ResponseEntity<?> handleCommand(@Valid @RequestBody CommandRequest request) {
+        try {
+            Product product = aiAdminService.handlePrompt(request.prompt());
+            return ResponseEntity.ok(product);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
     public record CommandRequest(@NotBlank String prompt) {

@@ -17,7 +17,7 @@ public class AiAdminService {
     }
 
     public Product handlePrompt(String prompt) {
-        return chatClient.prompt()
+        Product product = chatClient.prompt()
                 .system("""
                         You are an admin assistant for product management.
                         You MUST call one of the provided tools to answer.
@@ -28,5 +28,11 @@ public class AiAdminService {
                 .tools(productTools)
                 .call()
                 .entity(Product.class);
+
+        if (product == null) {
+            throw new IllegalStateException("AI did not call any tool. Please rephrase your request.");
+        }
+
+        return product;
     }
 }
