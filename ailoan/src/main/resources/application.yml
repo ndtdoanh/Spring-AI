@@ -2,7 +2,7 @@ spring:
   application:
     name: ailoan
   datasource:
-    url: "jdbc:postgresql://localhost:5432/spring-ai"
+    url: "jdbc:postgresql://localhost:5432/product_demo"
     driverClassName: "org.postgresql.Driver"
     username: ${DB_USER:postgres}
     password: ${DB_PASSWORD:ndtdoanh}
@@ -20,13 +20,8 @@ spring:
         options:
           model: ${OLLAMA_MODEL:qwen2.5:3b}
           temperature: 0.0
-          num-predict: 40
+          num-predict: 120
           num-ctx: 2048
-          top-k: 1
-          top-p: 1.0
-          repeat-penalty: 1.1
-
-
 server:
   port: 8080
 
