@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { commandAI } from "./api";
+import type { AiCommandResponse } from "./types";
 
 export default function App() {
   const [adminUser, setAdminUser] = useState<string>("admin");
@@ -7,6 +8,7 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [answer, setAnswer] = useState<string>("");
+  const [dbProduct, setDbProduct] = useState<AiCommandResponse["product"] | null>(null);
 
   async function onSend() {
     setLoading(true);
@@ -14,6 +16,7 @@ export default function App() {
     try {
       const res = await commandAI(command, adminUser);
       setAnswer(res.answer);
+      setDbProduct(res.product);
     } catch (e: any) {
       setError(String(e?.message ?? e));
     } finally {
@@ -51,6 +54,17 @@ export default function App() {
             AI trả lời
           </div>
           <div className="answer-box">{answer || "Chưa có kết quả."}</div>
+        </div>
+
+        <div style={{ marginTop: 14 }}>
+          <div className="muted" style={{ marginBottom: 6 }}>
+            Dữ liệu DB trả về (nguồn chuẩn)
+          </div>
+          <div className="answer-box mono">
+            {dbProduct
+              ? JSON.stringify(dbProduct, null, 2)
+              : "Chưa có dữ liệu DB."}
+          </div>
         </div>
       </div>
     </div>
