@@ -34,8 +34,4 @@ public class ProductTools {
         lastResult = productRepository.save(product);
         return lastResult;
     }
-
-    public Product getLastResult() {
-        return lastResult;
-    }
 }

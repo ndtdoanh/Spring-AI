@@ -16,21 +16,17 @@ public class AiAdminService {
         this.productTools = productTools;
     }
 
-    public AiResult handlePrompt(String prompt) {
-        String response = chatClient.prompt()
+    public Product handlePrompt(String prompt) {
+        return chatClient.prompt()
                 .system("""
                         You are an admin assistant for product management.
-                        Only handle: get product or update product.
-                        Always call the appropriate tool and return the result as JSON.
+                        You MUST call one of the provided tools to answer.
+                        If you do not call a tool, you fail.
+                        Never answer by yourself.
                         """)
                 .user(prompt)
                 .tools(productTools)
                 .call()
-                .content();
-
-        return new AiResult(response, productTools.getLastResult());
-    }
-
-    public record AiResult(String answer, Product product) {
+                .entity(Product.class);
     }
 }
