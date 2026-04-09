@@ -15,7 +15,7 @@ public class AiAdminService {
 
     private static final Pattern GET_ID_PATTERN = Pattern.compile("\\bid\\s*(?:=|la|là)?\\s*(\\d+)\\b", Pattern.CASE_INSENSITIVE);
     private static final Pattern UPDATE_ID_PATTERN = Pattern.compile("\\bcap\\s*nhat\\b.*?\\bid\\s*(?:=|la|là)?\\s*(\\d+)\\b", Pattern.CASE_INSENSITIVE);
-    private static final Pattern NAME_PATTERN = Pattern.compile("\\bten\\b\\s*(?:=|la|là)?\\s*([^,;]+)", Pattern.CASE_INSENSITIVE);
+    private static final Pattern NAME_PATTERN = Pattern.compile("\\b(?:ten|tên)\\b\\s*(?:=|la|là)?\\s*([^,;]+)", Pattern.CASE_INSENSITIVE);
     private static final Pattern PRICE_PATTERN = Pattern.compile("\\bgia\\b\\s*(?:=|la|là)?\\s*([\\d.,]+)", Pattern.CASE_INSENSITIVE);
     private static final Pattern STATUS_PATTERN = Pattern.compile("\\btrang\\s*thai\\b\\s*(?:=|la|là)?\\s*([a-zA-Z_]+)", Pattern.CASE_INSENSITIVE);
 
