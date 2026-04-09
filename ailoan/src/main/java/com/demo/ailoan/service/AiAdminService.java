@@ -11,25 +11,24 @@ public class AiAdminService {
     private final ChatClient chatClient;
     private final ProductTools productTools;
 
-    public AiAdminService(ChatClient.Builder builder, ProductTools productTools) {
-        this.chatClient = builder.build();
+    public AiAdminService(ChatClient chatClient, ProductTools productTools) {
+        this.chatClient = chatClient;
         this.productTools = productTools;
     }
 
     public AiResult handlePrompt(String prompt) {
-
-        Product product = chatClient.prompt()
+        String response = chatClient.prompt()
                 .system("""
                         You are an admin assistant for product management.
                         Only handle: get product or update product.
-                        Always call the appropriate tool.
+                        Always call the appropriate tool and return the result as JSON.
                         """)
                 .user(prompt)
                 .tools(productTools)
                 .call()
-                .entity(Product.class);
+                .content();
 
-        return new AiResult("OK", product);
+        return new AiResult(response, productTools.getLastResult());
     }
 
     public record AiResult(String answer, Product product) {

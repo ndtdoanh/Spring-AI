@@ -2,14 +2,15 @@ package com.demo.ailoan.ai;
 
 import com.demo.ailoan.entity.Product;
 import com.demo.ailoan.repository.ProductRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class ProductTools {
 
     private final ProductRepository productRepository;
+    private Product lastResult;
 
     public ProductTools(ProductRepository productRepository) {
         this.productRepository = productRepository;
@@ -17,8 +18,9 @@ public class ProductTools {
 
     @Tool(description = "Get product detail by id")
     public Product getProductById(Long id) {
-        return productRepository.findById(id)
+        lastResult = productRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Product not found: " + id));
+        return lastResult;
     }
 
     @Transactional
@@ -29,6 +31,11 @@ public class ProductTools {
         product.setName(name);
         product.setPrice(price);
         product.setStatus(status);
-        return productRepository.save(product);
+        lastResult = productRepository.save(product);
+        return lastResult;
+    }
+
+    public Product getLastResult() {
+        return lastResult;
     }
 }
