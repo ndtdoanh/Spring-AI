@@ -28,7 +28,11 @@ public class AiCommandController {
     public ResponseEntity<?> handleCommand(@Valid @RequestBody CommandRequest request) {
         try {
             Product product = aiAdminService.handlePrompt(request.prompt());
-            return ResponseEntity.ok(product);
+            Map<String, Object> response = Map.of(
+                    "answer", "Thực hiện thành công",
+                    "product", product
+            );
+            return ResponseEntity.ok(response);
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }

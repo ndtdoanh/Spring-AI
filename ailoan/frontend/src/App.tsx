@@ -58,7 +58,7 @@ export default function App() {
 
         <div style={{ marginTop: 14 }}>
           <div className="muted" style={{ marginBottom: 6 }}>
-            Dữ liệu DB trả về (nguồn chuẩn)
+            Dữ liệu DB trả về
           </div>
           <div className="answer-box mono">
             {dbProduct

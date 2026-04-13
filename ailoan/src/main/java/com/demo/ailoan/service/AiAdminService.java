@@ -1,7 +1,9 @@
 package com.demo.ailoan.service;
 
+import com.demo.ailoan.ai.ProductHolder;
 import com.demo.ailoan.ai.ProductTools;
 import com.demo.ailoan.entity.Product;
+import com.demo.ailoan.repository.ProductRepository;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
 
@@ -9,30 +11,34 @@ import org.springframework.stereotype.Service;
 public class AiAdminService {
 
     private final ChatClient chatClient;
-    private final ProductTools productTools;
+    private final ProductRepository productRepository;
 
-    public AiAdminService(ChatClient chatClient, ProductTools productTools) {
+    public AiAdminService(ChatClient chatClient, ProductRepository productRepository) {
         this.chatClient = chatClient;
-        this.productTools = productTools;
+        this.productRepository = productRepository;
     }
 
     public Product handlePrompt(String prompt) {
-        Product product = chatClient.prompt()
+        ProductHolder holder = new ProductHolder();
+
+        ProductTools tools = new ProductTools(productRepository, holder);
+
+        chatClient.prompt()
                 .system("""
                         You are an admin assistant for product management.
                         You MUST call one of the provided tools to answer.
-                        If you do not call a tool, you fail.
                         Never answer by yourself.
                         """)
                 .user(prompt)
-                .tools(productTools)
+                .tools(tools)
                 .call()
-                .entity(Product.class);
+                .content();
 
-        if (product == null) {
+        Product result = holder.get();
+        if (result == null) {
             throw new IllegalStateException("AI did not call any tool. Please rephrase your request.");
         }
 
-        return product;
+        return result;
     }
 }
